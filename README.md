@@ -15,6 +15,7 @@ Game Mode:
 - Task: find songs and keep track of time stamps (for lines)
 - List 2 upcoming lines (maybe previous too)
 - User needs to finish typing line before singer
+- Secondary Game: C++ Time Trials
 
 Assignments:
 - Will: Showing keystrokes on screen
