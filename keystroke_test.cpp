@@ -68,6 +68,10 @@ int main() {
 
   char mychar;
   vector<string> lyrics = buble_lyrics;
+  lyric_len = lyrics.size();
+
+  int accuracy;
+
   string line;
   string current_line;
   string current_caps;
@@ -132,6 +136,8 @@ int main() {
             // if the character typed is NOT correct
             else {
               mistakes += 1;
+              
+
             }
           }
         }
@@ -142,9 +148,15 @@ int main() {
     window.display();
 
   }
-
+  accuracy = (mistakes/lyric_len) *100;
   sf::Time song_duration = music.getDuration();
   //cout << ceil(song_duration.asSeconds()) << "\n";  //show total duration of song
+<<<<<<< HEAD
   cout << mistakes << "\n";
+=======
+  cout << i << "\n";
+
+  cout << "Accuracy:"<< " " << accuracy << "\n";
+>>>>>>> 3a6bdf80edf82eae6215912f220b0e713588c9cf
   return 0;
 }
