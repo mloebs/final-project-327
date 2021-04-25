@@ -99,7 +99,7 @@ int main() {
       cout << curr_sec << " : " << buble_intervals.at(i) << "\n";
       i += 1;
       j = 0;
-      pos = 0.0;
+      pos = 20.0;
       window.clear();
       mytext.setString(" ");
       window.draw(mylyrics);
@@ -133,9 +133,7 @@ int main() {
             else {
               mistakes += 1;
             }
-
           }
-
         }
       }
     }
@@ -147,6 +145,6 @@ int main() {
 
   sf::Time song_duration = music.getDuration();
   //cout << ceil(song_duration.asSeconds()) << "\n";  //show total duration of song
-  cout << i << "\n";
+  cout << mistakes << "\n";
   return 0;
 }
