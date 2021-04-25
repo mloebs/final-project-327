@@ -65,25 +65,36 @@ int main() {
   mytext.setFillColor(sf::Color::White);
 
 
-
+  // Find number of chars in song lyrics
   char mychar;
-  vector<string> lyrics = buble_lyrics;
-  lyric_len = lyrics.size();
+  vector<string> lyrics = roxanne_lyrics;
 
-  int accuracy;
+  vector<char> char_lyrics;
+  for (string s: lyrics) {
+    for (char c :s)
+      if (c != ' ') {
+    char_lyrics.push_back(c);
+  }
+  }
+
+  int char_lyrics_size = char_lyrics.size();
+
+  // Create accuracy 
+  float accuracy;
+
 
   string line;
   string current_line;
   string current_caps;
   int i = 0; // iterate through lines in lyrics
   int j = 0; // iterate through characters in lines
-  int mistakes = 0; // counts mistakenly typed chars
+  float mistakes = 0; // counts mistakenly typed chars
   float char_width;
 
 
   // Play music from .ogg files
   sf::Music music;
-  if (!music.openFromFile("buble.ogg"))
+  if (!music.openFromFile("roxanne.ogg"))
     return -1; // error
   music.play();
 
@@ -98,9 +109,9 @@ int main() {
 
 
     // Switching line
-    if (curr_sec >= buble_intervals.at(i)) {
+    if (curr_sec >= roxanne_intervals.at(i)) {
       current_line = lyrics.at(i);
-      cout << curr_sec << " : " << buble_intervals.at(i) << "\n";
+      cout << curr_sec << " : " << roxanne_intervals.at(i) << "\n";
       i += 1;
       j = 0;
       pos = 20.0;
@@ -137,7 +148,6 @@ int main() {
             else {
               mistakes += 1;
               
-
             }
           }
         }
@@ -148,15 +158,13 @@ int main() {
     window.display();
 
   }
-  accuracy = (mistakes/lyric_len) *100;
   sf::Time song_duration = music.getDuration();
   //cout << ceil(song_duration.asSeconds()) << "\n";  //show total duration of song
-<<<<<<< HEAD
-  cout << mistakes << "\n";
-=======
-  cout << i << "\n";
+ 
 
-  cout << "Accuracy:"<< " " << accuracy << "\n";
->>>>>>> 3a6bdf80edf82eae6215912f220b0e713588c9cf
+  // Create accuracy and cout accuracy
+  accuracy = (mistakes/char_lyrics_size) *100;
+  cout << "Accuracy: " << accuracy << "\n";
+  
   return 0;
 }
