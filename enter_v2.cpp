@@ -487,7 +487,7 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
   float current_char_size = current_char.size();
 
   // if no entered chars accuracy = 0
-  if (user_total == 0) {
+  if ( (user_total == 0) || (mistakes > char_correct)) {
     accuracy = 0;
   } else {
     accuracy = ( (char_correct - mistakes) / (current_char_size) * 100);
