@@ -5,6 +5,8 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <chrono>
+#include <cmath>
+#include <cctype>
 #include <ctime>
 #include <string>
 #include <vector>
@@ -165,6 +167,21 @@ void calibrateScores(){
   }
 }
 
+/////////////////// Gameplay Functions ///////////////////
+vector<string> get_lyrics(string filename) { // eg "roxanne.txt"
+  vector<string> lyrics;
+  string line;
+  std::ifstream lyricfile;
+  lyricfile.open(filename);
+  while (std::getline(lyricfile, line)) {
+    std::transform(line.begin(), line.end(), line.begin(), ::toupper);
+    lyrics.push_back(line);
+  }
+  lyrics.push_back(" ");
+  lyrics.push_back(" ");
+  lyricfile.close();
+  return lyrics;}
+
 /////////////////// GUI Functions ///////////////////
 void pickSong(sf::RenderWindow &window, Button User){
   string userName = "User: " + User.getName();
@@ -192,18 +209,22 @@ void pickSong(sf::RenderWindow &window, Button User){
           if (Elton.clickButton(event)) {
             std::cout << "Elton";
             window.clear();
+            playGame(window, User, Elton);
           }
           if (Elvis.clickButton(event)) {
             std::cout << "Elvis";
             window.clear();
+            playGame(window, User, Elvis);
           }
           if (Rex.clickButton(event)) {
             std::cout << "Rex";
             window.clear();
+            playGame(window, User, Rex);
           }  
           if (Michael.clickButton(event)) {
             std::cout << "Michael";
             window.clear();
+            playGame(window, User, Michael);
           }
           if (Back.clickButton(event)) {
             std::cout << "Back";
@@ -226,27 +247,175 @@ void pickSong(sf::RenderWindow &window, Button User){
 
 void playGame(sf::RenderWindow &window, Button User, Button Song){
   string name = User.getName();
-  std::cout << name;
-  Button Play{name, 310, 0};
-  sf::Event event;
+  string selection = Song.getName();
+  vector<string> roxanne_lyrics = get_lyrics("roxanne.txt");
+  vector<string> cant_help_lyrics = get_lyrics("cant_help.txt");
+  vector<string> buble_lyrics = get_lyrics("buble.txt");
+  vector<string> nothing_lyrics = get_lyrics("nothing.txt");
+  vector<string> your_song_lyrics = get_lyrics("your_song.txt");
+  vector<int> roxanne_intervals {19, 22, 27, 29, 33, 36, 41, 44, 49, 52, 55, 59, 63, 67, 70, 73, 76, 91, 94, 98, 102, 106, 109, 113, 116, 120, 123, 127, 130, 134, 137, 141, 144, 148, 151, 154, 158, 162, 165, 169, 172, 175, 179, 182, 185, 190}; //190
+  vector<int> cant_help_intervals {8, 14, 21, 36, 43, 50, 64, 68, 72, 76, 83, 90, 97, 111, 115, 119, 122, 129, 135, 143, 157, 174, 181}; //181
+  vector<int> buble_intervals {19, 27, 35, 38, 50, 58, 65, 67, 78, 84, 93, 98, 106, 113, 121, 133, 161, 168, 175, 179, 183, 188, 202, 217, 233}; //233
+  vector<int> nothing_intervals {40, 43, 47, 52, 58, 64, 68, 71, 74, 77, 81, 86, 90, 93, 96, 101, 114, 119, 122, 125, 131, 138, 142, 145, 151, 157, 160, 164, 166, 170, 173, 179, 181, 185, 193, 195, 202, 207, 214, 294}; //294
+  vector<int> your_song_intervals {8, 12, 15, 23, 30, 39, 44, 47, 54, 62, 72, 76, 79, 87, 89, 91, 95, 113, 120, 128, 131, 135, 145, 149, 153, 160, 168, 177, 181, 185, 192, 194, 196, 201, 211, 213, 215, 220, 244}; //244
 
-  while (window.isOpen()){
-    while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed)
+  sf::Text mylyrics;
+  sf::Text mytext;
+  sf::Text mypreview;
+  sf::Font font;
+  sf::Time song_duration;
+  sf::Music music;
+
+  sf::Image box;
+  box.create(10,10,sf::Color::Yellow);
+  box.loadFromFile("jbchero.PNG");
+
+  sf::Texture texture;
+  texture.loadFromImage(box);
+
+  sf::Sprite sprite;
+  sprite.setTexture(texture);
+  sprite.setScale(.5,.5);
+  sprite.setPosition(175,300);
+
+  sf::Color Gray(100, 100, 100);
+
+  float pos = 0.0;
+  font.loadFromFile("/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf");
+
+  // Properties of text
+  mylyrics.setFont(font);
+  mytext.setFont(font);
+  mypreview.setFont(font);
+  mylyrics.setPosition(20, 50);
+  mytext.setPosition(pos, 200);
+  mypreview.setPosition(20, 20);
+  mylyrics.setCharacterSize(22);
+  mytext.setCharacterSize(22);
+  mypreview.setCharacterSize(16);
+  mylyrics.setFillColor(sf::Color::White);
+  mytext.setFillColor(sf::Color::White);
+  mypreview.setFillColor(Gray);
+
+
+  // variables
+  char mychar;                            // character typed by user
+  vector<string> lyrics = buble_lyrics;
+  int accuracy;
+  int ending;
+  string line;
+  string current_line;
+  int i = 0;                               // iterate through lines in lyrics
+  int j = 0;                               // iterate through characters in lines
+  int mistakes = 0;  
+  int missing = 0;                      // counts mistakenly typed chars
+  float char_width;
+  vector<int> intervals;
+
+  // song selection
+
+  if (selection == "Roxanne - The Police") {
+    lyrics = roxanne_lyrics;
+    intervals = roxanne_intervals;
+    music.openFromFile("roxanne.ogg");
+    music.play();
+  }
+
+  else if (selection == "Your Song - Elton John") {
+    lyrics = your_song_lyrics;
+    intervals = your_song_intervals;
+    music.openFromFile("your_song.ogg");
+    music.play();
+  }
+
+  else if (selection == "Falling in Love - Elvis") {
+    lyrics = cant_help_lyrics;
+    intervals = cant_help_intervals;
+    music.openFromFile("cant_help.ogg");
+    music.play();
+  }
+
+  else if (selection == "Nothing - Rex Orange County") {
+    lyrics = nothing_lyrics;
+    intervals = nothing_intervals;
+    music.openFromFile("nothing.ogg");
+    music.play();
+  }
+
+  else if (selection == "Merry Christmas - Mike Buble") {
+    lyrics = buble_lyrics;
+    intervals = buble_intervals;
+    music.openFromFile("buble.ogg");
+    music.play();
+  }
+
+  song_duration = music.getDuration();
+  ending = ceil(song_duration.asSeconds());
+
+  // Window animation
+  while (window.isOpen()) {
+    sf::Event event;
+    mylyrics.setString(lyrics.at(i));
+
+    // Current second in song
+    int curr_sec = floor(music.getPlayingOffset().asSeconds());
+
+    if (i < lyrics.size()) {
+      if (i < (lyrics.size() - 1)) {
+        mypreview.setString(lyrics.at((i + 1)));
+      }
+
+      // Switching line
+      if (curr_sec >= intervals.at(i)) {
+        current_line = lyrics.at(i);
+        i += 1;
+        j = 0;
+        pos = 20.0;
+        window.clear();
+        mytext.setString(" ");
+        window.draw(mylyrics);
+        window.draw(mypreview);
+      }
+
+      while (window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed) {
           window.close();
-        if (event.type == sf::Event::MouseButtonPressed){
-          if (Play.clickButton(event)) {
-            std::cout << "Play";
-            window.clear();
-            addScores(name, "100");
-            calibrateScores();
-            userMenu(window);
+          music.stop();
+        }
+
+        // Proceed to next line of lyrics
+        if (event.type == sf::Event::TextEntered) {
+          if (event.text.unicode < 128) {
+            mychar = toupper(event.text.unicode);
+
+
+            if (j < current_line.length()) {
+
+              // if the character typed is correct
+              if (mychar == current_line.at(j)) {
+                mytext.setString(mychar);
+                char_width = mytext.getLocalBounds().width;
+                mytext.setPosition(pos, 200);
+                j += 1;
+                pos += char_width;
+              }
+
+              // if the character typed is NOT correct
+              else {
+                mistakes += 1;
+              }
+            }
           }
         }
-    Play.showButton(window);
-    window.display();
-    } 
-  }  
+      }
+      window.draw(mytext);
+      window.draw(sprite);
+      window.display();
+    }
+    if (curr_sec == (ending - 1)) {
+      window.close();
+    }
+  } 
 }
 
 void scores(sf::RenderWindow &window){
@@ -463,6 +632,18 @@ void start(sf::RenderWindow &window){
 
   sf::Event event;
 
+  sf::Image box;
+  box.create(10,10,sf::Color::Yellow);
+  box.loadFromFile("jbchero.PNG");
+
+  sf::Texture texture;
+  texture.loadFromImage(box);
+
+  sf::Sprite sprite;
+  sprite.setTexture(texture);
+  sprite.setScale(.5,.5);
+  sprite.setPosition(175,0);
+
   while (window.isOpen()){
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
@@ -486,6 +667,7 @@ void start(sf::RenderWindow &window){
     Play.showButton(window);
     Inst.showButton(window);
     Scores.showButton(window);
+    window.draw(sprite);
     window.display();
     } 
   }  
@@ -493,7 +675,7 @@ void start(sf::RenderWindow &window){
 
 /////////////////// Main Functions ///////////////////
 int main() {
-  sf::RenderWindow window(sf::VideoMode(720, 720), "Type2Learn Game");
+  sf::RenderWindow window(sf::VideoMode(720, 720), "jbcHero Game");
   start(window);
   return 0;
 }
