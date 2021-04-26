@@ -12,4 +12,4 @@ game: gameplay_fxn.cpp
 	g++ gameplay_fxn.cpp -o game -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 enter: enter.cpp
-	g++ enter.cpp -o enter -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -Wall
+	g++ enter.cpp -o enter -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio 

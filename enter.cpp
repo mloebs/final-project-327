@@ -97,7 +97,7 @@ void playGame(sf::RenderWindow &window, Button User, Button Song);
 void scores(sf::RenderWindow &window);
 // Scoreboard Functions
 vector<string> readScores();
-void addScores();
+void addScores(string user, string score);
 void calibrateScores();
 
 /////////////////// Scoreboard Functions ///////////////////
@@ -119,9 +119,11 @@ void addScores(string user, string score){
 
   std::ofstream newfile("highscores.txt");
 
+  if (words.size() > 0){
   for (int i=0; i<words.size(); i=i+2)
     newfile << words.at(i) << " " << words.at(i+1) << "\n";
   newfile.close();
+  }
 
 }
 
@@ -229,7 +231,7 @@ void pickSong(sf::RenderWindow &window, Button User){
           if (Back.clickButton(event)) {
             std::cout << "Back";
             window.clear();
-            chooseUser(window);
+            start(window);
           }        
         }
     Choose.showButton(window);
@@ -312,6 +314,14 @@ void playGame(sf::RenderWindow &window, Button User, Button Song){
   float char_width;
   vector<int> intervals;
 
+
+  vector<char> michar;
+  vector<char> current_char;
+  float char_correct = 0;          // correctly entered chars
+  float char_total = 0;              // total entered chars
+  float char_nothing = 0;             // count if user doesn't enter anything
+
+
   // song selection
 
   if (selection == "Roxanne - The Police") {
@@ -368,6 +378,9 @@ void playGame(sf::RenderWindow &window, Button User, Button Song){
       // Switching line
       if (curr_sec >= intervals.at(i)) {
         current_line = lyrics.at(i);
+        for (char c :current_line){
+          current_char.push_back(c);
+        }
         i += 1;
         j = 0;
         pos = 20.0;
@@ -393,16 +406,22 @@ void playGame(sf::RenderWindow &window, Button User, Button Song){
 
               // if the character typed is correct
               if (mychar == current_line.at(j)) {
+                char_total += 1;
                 mytext.setString(mychar);
                 char_width = mytext.getLocalBounds().width;
                 mytext.setPosition(pos, 200);
                 j += 1;
                 pos += char_width;
+                char_correct++;
+                char_total++;
+                michar.push_back(mychar);                
               }
 
               // if the character typed is NOT correct
               else {
                 mistakes += 1;
+                char_total++;
+                michar.push_back(mychar);
               }
             }
           }
@@ -413,9 +432,39 @@ void playGame(sf::RenderWindow &window, Button User, Button Song){
       window.display();
     }
     if (curr_sec == (ending - 1)) {
-      window.close();
+      // Accuracy calc
+      float accuracy;
+      // Get lyric lines in charachters
+      vector<char> char_lyrics;
+      for (string s : lyrics) {
+        for (char c : s)
+          if (c != ' ') {
+            char_lyrics.push_back(c);
+          }
+      }
+      float char_lyrics_size = char_lyrics.size();
+
+      // count how many chars users missed
+      float current_char_size = current_char.size();
+      char_nothing = current_char_size - char_total;
+
+
+
+      // if no entered chars accuracy = 0
+      if (char_total == 0) {
+        accuracy = 0;
+      } else {
+        accuracy = ( (char_correct-mistakes-char_nothing) / (current_char_size) * 100);
+      }
+
+      std::cout << "accuracy:" << accuracy << "\n";
+      string myscore = to_string(floor(accuracy));
+      addScores(name, myscore);
+      calibrateScores();
+      window.clear();
+      start(window);
     }
-  } 
+  }
 }
 
 void scores(sf::RenderWindow &window){
@@ -563,15 +612,38 @@ void newUser(sf::RenderWindow &window){
   rectangle.setOutlineThickness(5);
   rectangle.setPosition(200, 275);
 
+  // Entered Name
+  sf::Text enterName;
+  sf::Font font;
+  string addName;
+  char addChar;
+  font.loadFromFile("/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf");
+  enterName.setFont(font);
+  enterName.setPosition(210, 275);
+  enterName.setCharacterSize(60);
+  enterName.setFillColor(sf::Color::Blue);
+
   sf::Event event;
   while (window.isOpen()){
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
           window.close();
+        if (event.type == sf::Event::TextEntered) {
+          if (event.text.unicode < 128){
+            addChar = event.text.unicode;
+            if (addChar == '\b' and !addName.empty()) {
+              addName.pop_back();}
+            else if (addName.length() < 7){
+            addName.push_back(addChar);}
+            enterName.setString(addName);
+          }
+        }
         if (event.type == sf::Event::MouseButtonPressed){
           if (Start.clickButton(event)) {
             std::cout << "Start";
+            Button NewName{addName,0,0};
             window.clear();
+            pickSong(window, NewName);
           }
           if (Back.clickButton(event)) {
             std::cout << "Back";
@@ -583,6 +655,7 @@ void newUser(sf::RenderWindow &window){
     Back.showButton(window);
     Enter.showButton(window);
     window.draw(rectangle);
+    window.draw(enterName);
     window.display();
     } 
   }    
