@@ -95,6 +95,8 @@ void chooseUser(sf::RenderWindow &window);
 void pickSong(sf::RenderWindow &window, Button User);
 void playGame(sf::RenderWindow &window, Button User, Button Song);
 void scores(sf::RenderWindow &window);
+void instructions(sf::RenderWindow &window);
+
 // Scoreboard Functions
 vector<string> readScores();
 void addScores(string user, string score);
@@ -185,6 +187,49 @@ vector<string> get_lyrics(string filename) { // eg "roxanne.txt"
   return lyrics;}
 
 /////////////////// GUI Functions ///////////////////
+void instructions(sf::RenderWindow &window){
+  Button Back {"Back",550,650};
+  sf::Text Inst;
+  sf::Font font;
+  string para;
+  para = "Greetings\n";
+  para += "Welcome to jbchero!\n";
+  para += "Type as quickly and accurately ";
+  para += "as you can.\n";
+  para += "No need to press backspace, ";
+  para += "just enter the right characters to "; 
+  para += "proceed. \n You will get deducted for ";
+  para += "incorrectly entered characters. \n If "; 
+  para += "you have what it takes to get on the top 20,\n";
+  para += "you will become a returning user. Returning users "; 
+  para += "have the \n convenience of skipping making a new profile. ";
+  para +=  "Enjoy :)";
+  font.loadFromFile("/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf");
+  Inst.setFont(font);
+  Inst.setPosition(0, 0);
+  Inst.setCharacterSize(20);
+  Inst.setFillColor(sf::Color::White);
+  Inst.setString(para);
+
+  sf::Event event;
+
+  while (window.isOpen()){
+    while (window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed)
+          window.close();
+        if (event.type == sf::Event::MouseButtonPressed){
+          if (Back.clickButton(event)) {
+            window.clear();  
+            start(window);
+          }
+        }
+    Back.showButton(window);
+    window.draw(Inst);
+    window.display();
+    } 
+  }  
+}
+
 void pickSong(sf::RenderWindow &window, Button User){
   string userName = "User: " + User.getName();
   Button chosenUser{userName, 0, 650};
@@ -204,32 +249,26 @@ void pickSong(sf::RenderWindow &window, Button User){
           window.close();
         if (event.type == sf::Event::MouseButtonPressed){
           if (Roxanne.clickButton(event)) {
-            std::cout << "Roxanne";
             window.clear();
             playGame(window, User, Roxanne);
           }
           if (Elton.clickButton(event)) {
-            std::cout << "Elton";
             window.clear();
             playGame(window, User, Elton);
           }
           if (Elvis.clickButton(event)) {
-            std::cout << "Elvis";
             window.clear();
             playGame(window, User, Elvis);
           }
           if (Rex.clickButton(event)) {
-            std::cout << "Rex";
             window.clear();
             playGame(window, User, Rex);
           }  
           if (Michael.clickButton(event)) {
-            std::cout << "Michael";
             window.clear();
             playGame(window, User, Michael);
           }
           if (Back.clickButton(event)) {
-            std::cout << "Back";
             window.clear();
             start(window);
           }        
@@ -457,7 +496,7 @@ void playGame(sf::RenderWindow &window, Button User, Button Song){
         accuracy = ( (char_correct-mistakes-char_nothing) / (current_char_size) * 100);
       }
 
-      std::cout << "accuracy:" << accuracy << "\n";
+      // std::cout << "accuracy:" << accuracy << "\n";
       string myscore = to_string(floor(accuracy));
       addScores(name, myscore);
       calibrateScores();
@@ -516,7 +555,6 @@ void scores(sf::RenderWindow &window){
           window.close();
         if (event.type == sf::Event::MouseButtonPressed){
           if (Back.clickButton(event)) {
-            std::cout << "Back";
             window.clear();
             start(window);
           }
@@ -580,7 +618,6 @@ void chooseUser(sf::RenderWindow &window){
           window.close();
         if (event.type == sf::Event::MouseButtonPressed){
           if (Back.clickButton(event)) {
-            std::cout << "Back";
             window.clear();
             userMenu(window);}
           for (auto& p : PlayerList){
@@ -640,13 +677,11 @@ void newUser(sf::RenderWindow &window){
         }
         if (event.type == sf::Event::MouseButtonPressed){
           if (Start.clickButton(event)) {
-            std::cout << "Start";
             Button NewName{addName,0,0};
             window.clear();
             pickSong(window, NewName);
           }
           if (Back.clickButton(event)) {
-            std::cout << "Back";
             window.clear();
             userMenu(window);
           }
@@ -666,6 +701,18 @@ void userMenu(sf::RenderWindow &window){
   Button Return{"Returning User", 185, 475};
   Button Back{"Back", 290, 550};
 
+  sf::Image box;
+  box.create(10,10,sf::Color::Yellow);
+  box.loadFromFile("jbchero.PNG");
+
+  sf::Texture texture;
+  texture.loadFromImage(box);
+
+  sf::Sprite sprite;
+  sprite.setTexture(texture);
+  sprite.setScale(.5,.5);
+  sprite.setPosition(175,0);
+
   sf::Event event;
 
   while (window.isOpen()){
@@ -674,17 +721,14 @@ void userMenu(sf::RenderWindow &window){
           window.close();
         if (event.type == sf::Event::MouseButtonPressed){
           if (New.clickButton(event)) {
-            std::cout << "New";
             window.clear();
             newUser(window);
           }
           if (Return.clickButton(event)) {
-            std::cout << "Return";
             window.clear();
             chooseUser(window);
           }
           if (Back.clickButton(event)) {
-            std::cout << "Return";
             window.clear();
             start(window);
           }
@@ -692,6 +736,7 @@ void userMenu(sf::RenderWindow &window){
     New.showButton(window);
     Return.showButton(window);
     Back.showButton(window);
+    window.draw(sprite);
     window.display();
     } 
   }    
@@ -723,16 +768,14 @@ void start(sf::RenderWindow &window){
           window.close();
         if (event.type == sf::Event::MouseButtonPressed){
           if (Play.clickButton(event)) {
-            std::cout << "Play";
             window.clear();  
             userMenu(window);
           }
           if (Inst.clickButton(event)) {
-            std::cout << "Instructions";
-            window.close();
+            window.clear();
+            instructions(window);
           }
           if (Scores.clickButton(event)) {
-            std::cout << "High Scores";
             window.clear();
             scores(window);
           }
