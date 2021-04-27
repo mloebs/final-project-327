@@ -1,28 +1,13 @@
-# final-project-327
-final project for ec 327 
+# jbcHero
+Hi and welcome to our final project, a guitar-hero-like game to improve your typing skills and accuracy,
+which we have coined "jbchero"
 
+This repo contains everything you need to play our game right away. 
+It includes two versions of our application, enter and enter_v2.
+enter_v2 includes our updated scoring system.
 
-Capabilities:
-- Start Screen
-- Option to create new users
-- Remember Users
-- 20 Users (Capability to make room for a new user)
-- Load lines beforehand
-- Text file (including timestamps) for each song
-- Scoreboard at the end 
+This repo also contains a makefile in case you would like to compile
+yourself. in that case either run
 
-Game Mode:
-- Task: find songs and keep track of time stamps (for lines)
-- List 2 upcoming lines (maybe previous too)
-- User needs to finish typing line before singer
-- Secondary Game: C++ Time Trials
-
-Assignments:
-- Will: Showing keystrokes on screen
-- Maxine: Songs, timestamp integration
-- Josh: Typing accuracy, WPM
-- Grayson: User Interface
-
-Statistics:
-- WPM, CCR
+make
 
