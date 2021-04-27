@@ -9,15 +9,16 @@ enter_v2 includes our updated scoring system.
 This repo also contains a makefile in case you would like to compile
 yourself. in that case either run
 
-'make enter'
+`make enter`
 or
-'maker enter_v2'
+`make enter_v2`
 in the directory. 
 
 Then to run the application simply type
-'enter'
+`enter`
 or
-'enter_v2'
+`enter_v2`
+and hit the enter key to start,
 depending on which version you'd like (both are equally as fun).
 
 From there, you'll find an instructions page on the main menu
