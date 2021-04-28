@@ -1,6 +1,17 @@
-// Team 12: Type 2 Learn
-// Summary:
+// Team 12: jbcHero Typing Game
+//
+// Summary: This is typing game aimed at improving typing speed
+// and accuracy. Specifically, our game targets an audience who 
+// is looking to improve their typing skills.  It differs from 
+// other typing games in that we’ve Guitar-Hero-ified it so users
+// can learn while playing along to their favorite songs. 
+// We’ve included five songs to start, which vary in genre and 
+// difficulty. Users can compete for high scores and try to 
+// improve their accuracy. A scoreboard keeps track of the 
+// 20 best players, which motivates the user to try to get 
+// the best score.
 
+/////////////////// Imports ///////////////////
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
@@ -19,13 +30,19 @@ using std::stoi;
 using std::to_string;
 
 /////////////////// Button Class ///////////////////
+// This class serves as a Button and Label for the GUI.
+//  - showButton is a method for SFML displaying the button.
+//  - reviseButton is a method for modifying prexisting buttons
+//    on the high score board and returning user.
+//  - clickButton is a boolean method that checks if the 
+//    mouse click event is on the button.
 class Button {
  public:
   Button(string name, int posx, int posy);
   void showButton(sf::RenderWindow &windowName);
   void reviseButton(string editname);
   bool clickButton(sf::Event &event);
-  string getName();
+  string getName(); // returns name attribute
 
  private:
   string user;
@@ -81,23 +98,28 @@ bool Button::clickButton(sf::Event &event) {
 }
 
 ////////////////// User Information Struct //////////////////
+// This struct is used for loading and saving usernames and 
+// user scores to the highscores.txt file. 
 struct userInfo {
   string userName;
   int userScore;
 };
 
 /////////////////// Predefine Functions ///////////////////
+// These functions are predefined to allow for recursive calls.
 // GUI Functions
-void start(sf::RenderWindow &window);
-void userMenu(sf::RenderWindow &window);
-void newUser(sf::RenderWindow &window);
-void chooseUser(sf::RenderWindow &window);
-void pickSong(sf::RenderWindow &window, Button User);
-void playGame(sf::RenderWindow &window, Button User, Button Song);
-void scores(sf::RenderWindow &window);
-void instructions(sf::RenderWindow &window);
+void start(sf::RenderWindow &window); // start menu
+void userMenu(sf::RenderWindow &window); // choose between new and return
+void newUser(sf::RenderWindow &window); // new user
+void chooseUser(sf::RenderWindow &window); // returning user
+void pickSong(sf::RenderWindow &window, Button User); // select song
+void playGame(sf::RenderWindow &window, Button User, Button Song); // play game
+void scores(sf::RenderWindow &window); // high scores
+void instructions(sf::RenderWindow &window); // instructions window
 
 // Scoreboard Functions
+// These are used for reading, writing, and calibrating
+// the highscores.txt
 vector<string> readScores();
 void addScores(string user, string score);
 void calibrateScores();
@@ -106,7 +128,7 @@ void calibrateScores();
 vector<string> readScores() {
   std::ifstream thisfile;
   vector<string> words;
-  thisfile.open("highscores.txt");
+  thisfile.open("highscores.txt"); // reads from highscores.txt
   string theword;
   while (thisfile >> theword)
     words.push_back(theword);
@@ -115,11 +137,11 @@ vector<string> readScores() {
 }
 
 void addScores(string user, string score) {
-  vector<string> words = readScores();
+  vector<string> words = readScores(); // reads from highscores.txt
   words.push_back(user);
-  words.push_back(score);
+  words.push_back(score); // adds current user to vector
 
-  std::ofstream newfile("highscores.txt");
+  std::ofstream newfile("highscores.txt"); // adds vector to highscores.txt
 
   if (words.size() > 0) {
     for (int i = 0; i < words.size(); i = i + 2)
@@ -130,25 +152,25 @@ void addScores(string user, string score) {
 }
 
 void calibrateScores() {
-  vector<string> words = readScores();
+  vector<string> words = readScores(); // reads highscores.txt
 
   vector<userInfo> userList;
   vector<userInfo> reducedList;
-  if (words.size() > 0) {
+  if (words.size() > 0) { // if highscores.txt is not empty
     for (int i = 0; i < words.size() - 1; i = i + 2) {
-      userInfo u;
+      userInfo u; // add to userInfo struct
       u.userName = words.at(i);
       u.userScore = stoi(words.at(i + 1));
       userList.push_back(u);
     }
 
     sort(userList.begin(), userList.end(), [](const userInfo & lhs, const userInfo & rhs) {
-      return lhs.userScore > rhs.userScore;
+      return lhs.userScore > rhs.userScore; // sort structs in descending
     });
 
     bool addUser = true;
     reducedList.push_back(userList.at(0));
-    for (int i = 0; i < userList.size(); i++) {
+    for (int i = 0; i < userList.size(); i++) { // delete repeat struct with lower score
       for (int j = 0; j < reducedList.size(); j++) {
         if (userList.at(i).userName == reducedList.at(j).userName) {
           addUser = false;
@@ -161,10 +183,10 @@ void calibrateScores() {
       addUser = true;
     }
 
-    while (reducedList.size() > 20) {
+    while (reducedList.size() > 20) { // delete player in 21st place
       reducedList.pop_back();
     }
-    std::ofstream newfile("highscores.txt");
+    std::ofstream newfile("highscores.txt"); // write to highscores file
     for (auto& w : reducedList) {
       newfile << w.userName << " " << w.userScore << "\n";
     }
@@ -190,7 +212,7 @@ vector<string> get_lyrics(string filename) { // eg "roxanne.txt"
 
 /////////////////// GUI Functions ///////////////////
 void instructions(sf::RenderWindow &window) {
-  Button Back {"Back", 550, 650};
+  Button Back {"Back", 550, 650}; // Back Button
   sf::Text Inst;
   sf::Font font;
   string para;
@@ -226,17 +248,17 @@ void instructions(sf::RenderWindow &window) {
         }
       }
       Back.showButton(window);
-      window.draw(Inst);
+      window.draw(Inst); // Instructions text box
       window.display();
     }
   }
 }
 
 void pickSong(sf::RenderWindow &window, Button User) {
-  string userName = "User: " + User.getName();
-  Button chosenUser{userName, 0, 650};
-  Button Choose{"Choose Song:", 0, 0};
-  Button Roxanne{"Roxanne - The Police", 0, 100};
+  string userName = "User: " + User.getName(); 
+  Button chosenUser{userName, 0, 650}; 
+  Button Choose{"Choose Song:", 0, 0}; 
+  Button Roxanne{"Roxanne - The Police", 0, 100}; // Song Buttons
   Button Elton{"Your Song - Elton John", 0, 175};
   Button Elvis{"Falling in Love - Elvis", 0, 250};
   Button Rex{"Nothing - Rex Orange County", 0, 325};
@@ -252,25 +274,25 @@ void pickSong(sf::RenderWindow &window, Button User) {
       if (event.type == sf::Event::MouseButtonPressed) {
         if (Roxanne.clickButton(event)) {
           window.clear();
-          playGame(window, User, Roxanne);
+          playGame(window, User, Roxanne); // start game with Roxanne
         }
         if (Elton.clickButton(event)) {
           window.clear();
-          playGame(window, User, Elton);
+          playGame(window, User, Elton); // start game with Elton
         }
         if (Elvis.clickButton(event)) {
           window.clear();
-          playGame(window, User, Elvis);
+          playGame(window, User, Elvis); // start game with Elvis
         }
         if (Rex.clickButton(event)) {
           window.clear();
-          playGame(window, User, Rex);
+          playGame(window, User, Rex); // start game with Rex
         }
         if (Michael.clickButton(event)) {
           window.clear();
-          playGame(window, User, Michael);
+          playGame(window, User, Michael); // start game with Michael
         }
-        if (Back.clickButton(event)) {
+        if (Back.clickButton(event)) { // go back
           window.clear();
           start(window);
         }
@@ -504,9 +526,9 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
 
 
 void scores(sf::RenderWindow &window) {
-  calibrateScores();
-  Button Back{"Back", 550, 650};
-  Button Enter{"High Scores:", 0, 0};
+  calibrateScores(); // Calibrate scores before showing
+  Button Back{"Back", 550, 650}; // Back Button
+  Button Enter{"High Scores:", 0, 0}; // High Scores
 
   Button p1{"1:", 0, 100};
   Button p2{"2:", 0, 150};
@@ -533,7 +555,7 @@ void scores(sf::RenderWindow &window) {
   vector<Button> PlayerList {p1, p2, p3, p4, p5, p6, p7, p8, p9, p10,
                              p11, p12, p13, p14, p15, p16, p17, p18, p19, p20};
 
-  vector<string> words = readScores();
+  vector<string> words = readScores(); // Read from highscores.txt
 
   if (words.size() > 0) {
     for (int i = 0; i < words.size() - 1; i = i + 2) {
@@ -541,7 +563,7 @@ void scores(sf::RenderWindow &window) {
       string score = words.at(i + 1);
       string player_score = player + "  " + score;
       Button& PlayerButton = PlayerList.at(i / 2);
-      PlayerButton.reviseButton(player_score);
+      PlayerButton.reviseButton(player_score); // Assign user to rank
     }
   }
 
@@ -553,11 +575,11 @@ void scores(sf::RenderWindow &window) {
       if (event.type == sf::Event::MouseButtonPressed) {
         if (Back.clickButton(event)) {
           window.clear();
-          start(window);
+          start(window); // go back to start menu
         }
       }
-      Back.showButton(window);
-      Enter.showButton(window);
+      Back.showButton(window); // Back Button
+      Enter.showButton(window); // High Scores Label
       for (auto& p : PlayerList) {
         p.showButton(window);
       }
@@ -567,9 +589,9 @@ void scores(sf::RenderWindow &window) {
 }
 
 void chooseUser(sf::RenderWindow &window) {
-  calibrateScores();
-  Button Back{"Back", 550, 650};
-  Button Enter{"Choose:", 0, 0};
+  calibrateScores(); // calibrate scoreboard before showing users
+  Button Back{"Back", 550, 650}; // Back button
+  Button Enter{"Choose:", 0, 0}; // Choose Label
 
   Button p1{"1:", 0, 100};
   Button p2{"2:", 0, 150};
@@ -598,13 +620,13 @@ void chooseUser(sf::RenderWindow &window) {
 
   std::ifstream thisfile;
 
-  vector<string> words = readScores();
+  vector<string> words = readScores(); // read from highscores.txt
 
   if (words.size() > 0) {
     for (int i = 0; i < words.size() - 1; i = i + 2) {
       string player = words.at(i);
       Button& PlayerButton = PlayerList.at(i / 2);
-      PlayerButton.reviseButton(player);
+      PlayerButton.reviseButton(player); // assign user to rank
     }
   }
 
@@ -614,11 +636,11 @@ void chooseUser(sf::RenderWindow &window) {
       if (event.type == sf::Event::Closed)
         window.close();
       if (event.type == sf::Event::MouseButtonPressed) {
-        if (Back.clickButton(event)) {
+        if (Back.clickButton(event)) { // Back button click
           window.clear();
           userMenu(window);
         }
-        for (auto& p : PlayerList) {
+        for (auto& p : PlayerList) { // Player button click
           if (p.clickButton(event) and words.size() > 0) {
             window.clear();
             pickSong(window, p);
@@ -629,7 +651,7 @@ void chooseUser(sf::RenderWindow &window) {
       Back.showButton(window);
       Enter.showButton(window);
       for (auto& p : PlayerList) {
-        p.showButton(window);
+        p.showButton(window); // show top 20
       }
       window.display();
     }
@@ -637,11 +659,11 @@ void chooseUser(sf::RenderWindow &window) {
 }
 
 void newUser(sf::RenderWindow &window) {
-  Button Start{"Start", 200, 350};
-  Button Back{"Back", 350, 350};
-  Button Enter{"Enter Name:", 200, 200};
+  Button Start{"Start", 200, 350}; // start button
+  Button Back{"Back", 350, 350}; // back button
+  Button Enter{"Enter Name:", 200, 200}; // enter name label
 
-  sf::RectangleShape rectangle;
+  sf::RectangleShape rectangle; // text box for input
   rectangle.setSize(sf::Vector2f(300, 75));
   rectangle.setOutlineColor(sf::Color::Red);
   rectangle.setOutlineThickness(5);
@@ -665,10 +687,10 @@ void newUser(sf::RenderWindow &window) {
         window.close();
       if (event.type == sf::Event::TextEntered) {
         if (event.text.unicode < 128) {
-          addChar = event.text.unicode;
-          if (addChar == '\b' and !addName.empty()) {
+          addChar = event.text.unicode; // add input key
+          if (addChar == '\b' and !addName.empty()) { // no include backspace
             addName.pop_back();
-          } else if (addName.length() < 7) {
+          } else if (addName.length() < 7) { // name must be less than 7 char
             addName.push_back(addChar);
           }
           enterName.setString(addName);
@@ -678,11 +700,11 @@ void newUser(sf::RenderWindow &window) {
         if (Start.clickButton(event)) {
           Button NewName{addName, 0, 0};
           window.clear();
-          pickSong(window, NewName);
+          pickSong(window, NewName); // Begin game
         }
         if (Back.clickButton(event)) {
           window.clear();
-          userMenu(window);
+          userMenu(window); // Go back to user menu
         }
       }
       Start.showButton(window);
@@ -696,13 +718,13 @@ void newUser(sf::RenderWindow &window) {
 }
 
 void userMenu(sf::RenderWindow &window) {
-  Button New{"New User", 250, 400};
+  Button New{"New User", 250, 400}; // choose new user or returning
   Button Return{"Returning User", 185, 475};
   Button Back{"Back", 290, 550};
 
   sf::Image box;
   box.create(10, 10, sf::Color::Yellow);
-  box.loadFromFile("jbchero.PNG");
+  box.loadFromFile("jbchero.PNG"); // Insert logo
 
   sf::Texture texture;
   texture.loadFromImage(box);
@@ -721,15 +743,15 @@ void userMenu(sf::RenderWindow &window) {
       if (event.type == sf::Event::MouseButtonPressed) {
         if (New.clickButton(event)) {
           window.clear();
-          newUser(window);
+          newUser(window); // insert new user
         }
         if (Return.clickButton(event)) {
           window.clear();
-          chooseUser(window);
+          chooseUser(window); // returning user
         }
         if (Back.clickButton(event)) {
           window.clear();
-          start(window);
+          start(window); // start menu
         }
       }
       New.showButton(window);
@@ -751,7 +773,7 @@ void start(sf::RenderWindow &window) {
 
   sf::Image box;
   box.create(10, 10, sf::Color::Yellow);
-  box.loadFromFile("jbchero.PNG");
+  box.loadFromFile("jbchero.PNG"); // Insert logo
 
   sf::Texture texture;
   texture.loadFromImage(box);
@@ -768,15 +790,15 @@ void start(sf::RenderWindow &window) {
       if (event.type == sf::Event::MouseButtonPressed) {
         if (Play.clickButton(event)) {
           window.clear();
-          userMenu(window);
+          userMenu(window); // go to user menu
         }
         if (Inst.clickButton(event)) {
           window.clear();
-          instructions(window);
+          instructions(window); // read instructions
         }
         if (Scores.clickButton(event)) {
           window.clear();
-          scores(window);
+          scores(window); // read high scores
         }
       }
       Play.showButton(window);
@@ -789,7 +811,7 @@ void start(sf::RenderWindow &window) {
 }
 
 /////////////////// Main Functions ///////////////////
-int main() {
+int main() { // begin entire game
   sf::RenderWindow window(sf::VideoMode(720, 720), "jbcHero Game");
   start(window);
   return 0;
