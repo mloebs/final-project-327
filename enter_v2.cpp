@@ -310,6 +310,11 @@ void pickSong(sf::RenderWindow &window, Button User) {
   }
 }
 
+//////////////////////////// Gameplay ///////////////////////////////////
+// This is the code that will run while the game is being played. First 
+// the lyrics and time stamps of all songs must be loaded into their own
+// respective vectors.
+
 void playGame(sf::RenderWindow &window, Button User, Button Song) {
   string name = User.getName();
   string selection = Song.getName();
@@ -324,6 +329,9 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
   vector<int> nothing_intervals {40, 43, 47, 52, 58, 64, 68, 71, 74, 77, 81, 86, 90, 93, 96, 101, 114, 119, 122, 125, 131, 138, 142, 145, 151, 157, 160, 164, 166, 170, 173, 179, 181, 185, 193, 195, 202, 207, 214, 294}; //294
   vector<int> your_song_intervals {8, 12, 15, 23, 30, 39, 44, 47, 54, 62, 72, 76, 79, 87, 89, 91, 95, 113, 120, 128, 131, 135, 145, 149, 153, 160, 168, 177, 181, 185, 192, 194, 196, 201, 211, 213, 215, 220, 244}; //244
 
+
+// Create SFML objects to be displayed during gameplay, 
+// including text boxes and the jbc Hero logo
   sf::Text mylyrics;
   sf::Text mytext;
   sf::Text mypreview;
@@ -348,7 +356,7 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
   float pos = 0.0;
   font.loadFromFile("/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf");
 
-  // Properties of text
+  // Properties of text (lyrics, lyric previews, and user-entered text)
   mylyrics.setFont(font);
   mytext.setFont(font);
   mypreview.setFont(font);
@@ -363,29 +371,29 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
   mypreview.setFillColor(Gray);
 
 
-  // variables
+  // Variables
   char mychar;                            // character typed by user
-  vector<string> lyrics = buble_lyrics;
+  vector<string> lyrics;                  // displayed lyrics to be typed
 
   int ending;
   string line;
   string current_line;
-  int i = 0;                               // iterate through lines in lyrics
-  int j = 0;                               // iterate through characters in lines
-  float mistakes = 0;
-  int missing = 0;                      // counts mistakenly typed chars
-  float char_width;
-  vector<int> intervals;
+  int i = 0;                              // iterates through lines in lyrics
+  int j = 0;                              // iterates through characters in lines
+  float mistakes = 0;                     // counts mistakenly typed chars
+  int missing = 0;                        // counts characters not typed
+  float char_width;                       // width of SFML characters
+  vector<int> intervals;                  // vector of song timestamps
 
 
 
   vector<char> current_char;
-  float char_correct = 0;          // correctly entered chars
-  float user_total = 0;              // total entered chars
+  float char_correct = 0;                 // correctly entered chars
+  float user_total = 0;                   // total entered chars
 
 
 
-  // song selection
+  // Assigning variables to selected song 
 
   if (selection == "Roxanne - The Police") {
     lyrics = roxanne_lyrics;
@@ -430,7 +438,7 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
     sf::Event event;
     mylyrics.setString(lyrics.at(i));
 
-    // Current second in song
+    // Returns the current timestamp in song
     int curr_sec = floor(music.getPlayingOffset().asSeconds());
 
     if (i < lyrics.size()) {
@@ -438,7 +446,7 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
         mypreview.setString(lyrics.at((i + 1)));
       }
 
-      // Switching line
+      // Switching lines
       if (curr_sec >= intervals.at(i)) {
         current_line = lyrics.at(i);
         for (char c : current_line) {
@@ -453,19 +461,21 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
         window.draw(mypreview);
       }
 
+      // Closes window if user exits out
       while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
           window.close();
           music.stop();
         }
 
-        // Proceed to next line of lyricsa
+        // Determining if user enters correct characters
         if (event.type == sf::Event::TextEntered) {
           if (event.text.unicode < 128) {
             mychar = toupper(event.text.unicode);
 
 
             if (j < current_line.length()) {
+
               // if the character typed is correct
               if (mychar == current_line.at(j)) {
                 mytext.setString(mychar);
@@ -493,7 +503,8 @@ void playGame(sf::RenderWindow &window, Button User, Button Song) {
     if (curr_sec == (ending - 1)) {
     }
   }
-  // Accuracy calc
+  
+  // Accuracy calculation
   float accuracy;
   // Get lyric lines in charachters
   vector<char> char_lyrics;
